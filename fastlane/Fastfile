@@ -1,0 +1,48 @@
+opt_out_usage
+fastlane_version "1.109.0"
+default_platform :mac
+
+desc "Increment (with 'bump' option) or set (with 'pre' option) the framework version"
+lane :bump_version do |options|
+  version = version_bump_xcconfig(path: "Configurations/Base.xcconfig", bump_type: options[:bump] && options[:bump].to_sym, version_pre: "beta.#{options[:beta]}")
+# TODO Version in pod spec
+# TODO Version in Getting Started
+  puts version
+end
+
+# TODO commit version: https://github.com/fastlane/examples/blob/master/Artsy/eidolon/Fastfile
+
+desc "Test using Swift Package Manager for macOS and Linux"
+platform :mac do
+  lane :tests do
+  	sh "swift test"
+  end
+end
+
+desc "Test using Xcode for iOS and build using Xcode for tvOS and watchOS"
+platform :ios do
+  lane :tests do
+    scan(scheme: "Deferred", device: "iPhone 6s (10.0)")
+    xcodebuild(scheme: "Deferred", destination: "platform=tvOS Simulator,name=Apple TV 1080p")
+    xcodebuild(scheme: "Deferred", destination: "platform=watchOS Simulator,name=Apple Watch - 42mm")
+  end
+end
+
+desc "Run CocoaPods linter"
+lane :lint do
+  pod_lib_lint(quick: true)
+end
+
+desc "Output documentation using Jazzy into docs/"
+lane :build_docs do
+  jazzy(config: ".jazzy.yml")
+end
+
+desc "Build and publish documentation from docs/ into gh-pages"
+lane :publish_docs do
+  build_docs
+  sh "fastlane/publish_docs.sh"
+end
+
+# TODO: change after_failure to "cat -n ~/Library/Logs/scan/*"
+# TODO: Jazzy docs only on all success... check for PR build?

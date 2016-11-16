@@ -1,0 +1,27 @@
+opt_out_usage
+default_platform :ios
+
+platform :ios do
+  lane :travis do
+    macOS
+    iOS
+    tvOS
+    lint
+  end
+
+  lane :macOS do
+    scan(scheme: "Deferred")
+  end
+
+  lane :iOS do
+    scan(scheme: "Deferred", device: "iPhone 7 (10.0)")
+  end
+
+  lane :tvOS do
+    scan(scheme: "Deferred")
+  end
+
+  lane :lint do
+    pod_lib_lint(quick: true)
+  end
+end
