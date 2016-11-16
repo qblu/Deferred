@@ -18,22 +18,14 @@ matrix:
   - env: JOB=Build-tvOS DESTINATION='platform=tvOS Simulator,name=Apple TV 1080p' ACTION=build
   - env: JOB=Build-watchOS DESTINATION='platform=watchOS Simulator,name=Apple Watch - 42mm' ACTION=build
   - os: linux
-    dist: trusty
     sudo: required
-    addons:
-      apt:
-        packages:
-        - clang-3.8
-        - libicu-dev
-    env: JOB=Test-Linux COMPILER=clang-3.8
-    before_install:
-    - wget -q -O - https://swift.org/keys/all-keys.asc | gpg --import -
+    services:
+      - docker
+    env: JOB=Test-Linux
     install:
-    - wget https://swift.org/builds/swift-3.0-release/ubuntu1404/swift-3.0-RELEASE/swift-3.0-RELEASE-ubuntu14.04.tar.gz
-    - tar xzf swift-3.0-RELEASE-ubuntu14.04.tar.gz
-    - export PATH=swift-3.0-RELEASE-ubuntu14.04/usr/bin:$PATH
+    - docker pull swiftdocker/swift
     script:
-    - swift test
+    - docker run --rm -v ${PWD}:/swift -w /swift "swiftdocker/swift:latest" swift test
   - env: JOB=Misc
     script:
     - bundle exec pod lib lint --quick
